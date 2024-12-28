@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -14,7 +15,7 @@ import (
 type Course struct {
 	CourseId    string  `json:"courseid"`
 	CourseName  string  `json:"coursename"`
-	CoursePrice int     `json"price"`
+	CoursePrice int     `json"courseprice"`
 	Author      *Author `json:"author"`
 }
 
@@ -34,6 +35,50 @@ func IsEmpty(c *Course) bool {
 
 func main() {
 	fmt.Println("welcome in build api")
+
+	r := mux.NewRouter()
+
+	// seeding
+	courseDB = append(courseDB, Course{
+		CourseId:    "1",
+		CourseName:  "Go",
+		CoursePrice: 100,
+		Author: &Author{
+			Fullname: "Jack Sparrow",
+			Website:  "https://learncodeonline.in",
+		},
+	})
+
+	courseDB = append(courseDB, Course{
+		CourseId:    "2",
+		CourseName:  "Node",
+		CoursePrice: 200,
+		Author: &Author{
+			Fullname: "John Doe",
+			Website:  "https://learncodeonline.in",
+		},
+	})
+
+	courseDB = append(courseDB, Course{
+		CourseId:    "3",
+		CourseName:  "React",
+		CoursePrice: 300,
+		Author: &Author{
+			Fullname: "Sparrow Doe",
+			Website:  "https://learncodeonline.in",
+		},
+	})
+
+	// routhing
+	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/courses", getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getOneCourse).Methods("GET")
+	r.HandleFunc("/course", createOnecourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateOnecourse).Methods("PUT")
+	r.HandleFunc("/course/{id}", deleteOnecourse).Methods("DELETE")
+
+	// listen on port 8080
+	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
 
@@ -85,6 +130,12 @@ func createOnecourse(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("No data inside JSON")
 		return
 	}
+	for _, c := range courseDB {
+		if c.CourseName == course.CourseName {
+			json.NewEncoder(w).Encode("Course already exists")
+			return
+		}
+	}
 
 	// generate unique id, string
 	// append to courseDB
@@ -115,6 +166,26 @@ func updateOnecourse(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// TODO: snd a response when id is not found 
-	
+	// TODO: sned a response when id is not found
+	for _, course := range courseDB {
+		if course.CourseId == params["id"] {
+			json.NewEncoder(w).Encode("No course found with this id")
+		}
+	}
+
+}
+
+func deleteOnecourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Delete One Corses")
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	// loop, id, remove (index, index+1)
+	for index, course := range courseDB {
+		if course.CourseId == params["id"] {
+			courseDB = append(courseDB[:index], courseDB[index+1:]...)
+			break
+		}
+	}
+	json.NewEncoder(w).Encode(params["id"] + " deleted")
 }
