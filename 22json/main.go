@@ -59,7 +59,7 @@ func DecodeJson() {
 	 if checkValue {
 		fmt.Println("JSON was valid")
 		json.Unmarshal(jsonDataFromWeb, &locCourses)
-		fmt.Println("%#v\n", locCourses)
+		fmt.Printf("%#v\n", locCourses)
 
 	 } else {
 		fmt.Println("JSON was not valid!")
