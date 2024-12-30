@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/fatih/color"
 	"github.com/gorilla/mux"
 )
 
 func main() {
 	fmt.Println("Hello, World")
+
+	c := color.New(color.FgGreen).Add(color.Underline)
+
 	/*
 		    r := mux.NewRouter()
 			r.HandleFunc("/", homeServer)
@@ -20,12 +24,14 @@ func main() {
 
 	r := mux.NewRouter()
 
-	staticDir := "/static"
+	staticDir := "./static"
 
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(staticDir))))
 
 	// Starting server
-	fmt.Println("Server running ..... http://localhost:8080")
+	fmt.Println("Server running .....")
+	fmt.Println("Server running .....")
+	c.Println("http://localhost:8080")
 	http.ListenAndServe(":8080", r)
 
 }
