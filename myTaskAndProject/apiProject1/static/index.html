@@ -1,60 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRUD App</title>
-</head>
-<body>
-  <h1>Task Manager</h1>
-  <input id="taskName" type="text" placeholder="Task Name" />
-  <button onclick="createTask()">Add Task</button>
-  <ul id="taskList"></ul>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD App</title>
+  </head>
+  <body>
+    <h1>Task Manager</h1>
+    <input id="taskName" type="text" placeholder="Task Name" />
+    <button onclick="createTask()">Add Task</button>
+    <ul id="taskList"></ul>
 
-  <script>
-    async function fetchTasks() {
-      const res = await fetch('/tasks');
-      const tasks = await res.json();
-      const taskList = document.getElementById('taskList');
-      taskList.innerHTML = '';
-      tasks.forEach(task => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          ${task.name} - ${task.done ? 'Done' : 'Not Done'}
+    <script>
+      async function fetchTasks() {
+        const res = await fetch("/tasks");
+        const tasks = await res.json();
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = "";
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+          ${task.name} - ${task.done ? "Done" : "Not Done"}
           <button onclick="deleteTask(${task.id})">Delete</button>
-          <button onclick="toggleTask(${task.id}, '${task.name}', ${!task.done})">Toggle</button>
+          <button onclick="toggleTask(${task.id}, '${
+            task.name
+          }', ${!task.done})">Toggle</button>
         `;
-        taskList.appendChild(li);
-      });
-    }
+          taskList.appendChild(li);
+        });
+      }
 
-    async function createTask() {
-      const taskName = document.getElementById('taskName').value;
-      if (!taskName) return alert('Task name is required');
-      await fetch('/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: taskName, done: false }),
-      });
-      document.getElementById('taskName').value = '';
+      async function createTask() {
+        const taskName = document.getElementById("taskName").value;
+        if (!taskName) return alert("Task name is required");
+        await fetch("/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: taskName, done: false }),
+        });
+        document.getElementById("taskName").value = "";
+        fetchTasks();
+      }
+
+      async function deleteTask(id) {
+        await fetch(`/tasks?id=${id}`, { method: "DELETE" });
+        fetchTasks();
+      }
+
+      async function toggleTask(id, name, done) {
+        await fetch("/tasks", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, name, done }),
+        });
+        fetchTasks();
+      }
+
       fetchTasks();
-    }
-
-    async function deleteTask(id) {
-      await fetch(`/tasks?id=${id}`, { method: 'DELETE' });
-      fetchTasks();
-    }
-
-    async function toggleTask(id, name, done) {
-      await fetch('/tasks', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, name, done }),
-      });
-      fetchTasks();
-    }
-
-    fetchTasks();
-  </script>
-</body>
+    </script>
+  </body>
 </html>
