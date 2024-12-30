@@ -21,6 +21,7 @@ var (
 )
 
 func main() {
+	hello()
 	http.HandleFunc("/tasks", tasksHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./static/index.html")
@@ -70,4 +71,7 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 		mu.Unlock()
 		w.WriteHeader(http.StatusNoContent)
 	}
+}
+func hello() {
+	fmt.Println("hello, world")
 }
