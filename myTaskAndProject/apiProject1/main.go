@@ -5,58 +5,69 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"github.com/fatih/color"
-	"github.com/gorilla/mux"
+	"sync"
 )
-
-// Create a new color object
-var c1 = color.New(color.FgCyan).Add(color.Underline)
 
 type Task struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
+	Done bool   `json:"done"`
 }
 
-var tasks []Task
-var nextId int = 1
+var (
+	tasks  = []Task{}
+	mu     sync.Mutex
+	nextID = 1
+)
 
 func main() {
-	fmt.Println("That is the API Created by Jack Sparrow...")
-	r := mux.NewRouter()
+	http.HandleFunc("/tasks", tasksHandler)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.html")
+	})
 
-	// Server Static file
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
-
-	// Routers
-	r.HandleFunc("/tasks", getTasks).Methods("GET")
-
+	fmt.Println("Server running on http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
 }
 
-// Handler's
-
-// All Task's
-func getTasks(w http.ResponseWriter, r *http.Request) {
+func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
-}
-
-// get a task by id
-func getTaskById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-
-}
-
-// create new Task
-func createTask(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	// var task
-}
-
-func checkError(err error) {
-	if err != nil {
-		c1.Printf("Somthing is Wrong %v", err)
+	switch r.Method {
+	case http.MethodGet:
+		mu.Lock()
+		json.NewEncoder(w).Encode(tasks)
+		mu.Unlock()
+	case http.MethodPost:
+		var task Task
+		json.NewDecoder(r.Body).Decode(&task)
+		mu.Lock()
+		task.ID = nextID
+		nextID++
+		tasks = append(tasks, task)
+		mu.Unlock()
+		json.NewEncoder(w).Encode(task)
+	case http.MethodPut:
+		var updatedTask Task
+		json.NewDecoder(r.Body).Decode(&updatedTask)
+		mu.Lock()
+		for i, t := range tasks {
+			if t.ID == updatedTask.ID {
+				tasks[i] = updatedTask
+				break
+			}
+		}
+		mu.Unlock()
+		w.WriteHeader(http.StatusNoContent)
+	case http.MethodDelete:
+		id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+		mu.Lock()
+		for i, t := range tasks {
+			if t.ID == id {
+				tasks = append(tasks[:i], tasks[i+1:]...)
+				break
+			}
+		}
+		mu.Unlock()
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
