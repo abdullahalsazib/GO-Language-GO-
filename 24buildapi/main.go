@@ -15,7 +15,7 @@ import (
 type Course struct {
 	CourseId    string  `json:"courseid"`
 	CourseName  string  `json:"coursename"`
-	CoursePrice int     `json"courseprice"`
+	CoursePrice int     `json:"courseprice"`
 	Author      *Author `json:"author"`
 }
 
@@ -110,7 +110,7 @@ func getOneCourse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	json.NewEncoder(w).Encode("No course found with this id")
-	return
+	// return
 }
 
 func createOnecourse(w http.ResponseWriter, r *http.Request) {
@@ -144,7 +144,7 @@ func createOnecourse(w http.ResponseWriter, r *http.Request) {
 	course.CourseId = strconv.Itoa(rand.Intn(100))
 	courseDB = append(courseDB, course)
 	json.NewEncoder(w).Encode(course)
-	return
+	// return
 }
 
 func updateOnecourse(w http.ResponseWriter, r *http.Request) {
