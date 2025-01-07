@@ -15,20 +15,21 @@ func (p payment) makePayment(amount float32) {
 	p.gateWay.pay(amount)
 }
 
-type fakePayment struct{}
+type paypal struct{}
 
-func (f fakePayment) pay(amount float32) {
-	fmt.Println("making payment is usnig fake: ", amount)
+func (p paypal) pay(amount float32) {
+	fmt.Println("Making paymenet is using paypal: ", amount)
 }
 
 func main() {
 	fmt.Println("Wellcome in go-interface")
 	// stripPaymentGw := strip{}
 	// razerPaymentGw := rezarpay{}
-	fakePayGw := fakePayment{}
+	// fakePayGw := fakePayment{}
+	paypalGw := paypal{}
 	newPayment := payment{
-		gateWay: fakePayGw,
+		gateWay: paypalGw,
 	}
-	newPayment.makePayment(200.3)	
+	newPayment.makePayment(200.10)
 
 }
