@@ -1,62 +1,39 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
-// Define the Shap interface
-type Shap interface {
-	Area() float64
-	Perimeter() float64
+type payment struct {
+	gateWay strip
 }
 
-// Rectangle struct
-type Rectangle struct {
-	Width, Height float64
+func (p payment) makePayment(amount float32) {
+	// razarPaygw := strip{}
+	p.gateWay.pay(100)
 }
 
-// Implement Area method for Rectangle
-func (r Rectangle) Area() float64 {
-	return r.Width * r.Height
+type rezarpay struct{}
+
+func (r rezarpay) pay(amount float32) {
+	fmt.Println("making payment is using razarpay: ", amount)
 }
 
-// Implement Perimeter method for Rectangle
-func (r Rectangle) Perimeter() float64 {
-	return 2 * (r.Width + r.Height)
+type strip struct{}
+
+func (s strip) pay(amount float32) {
+	fmt.Println("making payment is using strip: ", amount)
 }
 
-// Circle struct
-type Circle struct {
-	Radius float64
-}
-
-// Implement Area method for Circle
-func (c Circle) Area() float64 {
-	return 3.14 * c.Radius * c.Radius
-}
-
-// Implement Perimeter method for Circle
-func (c Circle) Perimeter() float64 {
-	return 2 * 3.14 * c.Radius
+type fakePayment struct{}
+func (f fakePayment) pay(amount float32) {
+	fmt.Println("making payment is usnig fake: ", amount)
 }
 
 func main() {
-	fmt.Println("Welcome to interfaces in Go!")
+	fmt.Println("Wellcome in go-interface")
+	stripPaymentGw := strip{}
+	newPayment := payment{
+		gateWay: stripPaymentGw,
+	}
+	newPayment.makePayment(100)
 
-	// Create instances of Rectangle and Circle
-	r := Rectangle{Width: 5, Height: 7}
-	c := Circle{Radius: 10}
-
-	// Declare a Shap interface variable
-	var s Shap
-
-	// Assign Rectangle to the interface
-	s = r
-	fmt.Println("Rectangle Area: ", s.Area())
-	fmt.Println("Rectangle Perimeter: ", s.Perimeter())
-
-	// Assign Circle to the interface
-	s = c
-	fmt.Println("Circle Area: ", s.Area())
-	fmt.Println("Circle Perimeter: ", s.Perimeter())
 }
