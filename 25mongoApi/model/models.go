@@ -7,3 +7,4 @@ type Netflix struct {
 	Movie   string             `json:"movie,omitempty"`
 	Watched bool               `json:"watched,omitempty"`
 }
+
