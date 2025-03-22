@@ -1,33 +1,43 @@
 package main
 
 import (
-	"gorm.io/driver/sqlite"
+	"fmt"
+	"log"
+
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-type Product struct {
+type User struct {
 	gorm.Model
-	Code  string
-	Price uint
+	Name  string `gorm:"size:255;not null"`
+	Email string `gorm:"unique;not null"`
+	Age   int
+}
+
+var DB *gorm.DB
+
+func ConnectDb() {
+	dsn := "host=localhost user=postgres password=root dbname=otherdb port=5432 sslmode=disable  TimeZone=Asia/Dhaka"
+	var err error
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to PostgreSQL: %v", err)
+	}
+
+	fmt.Println("✅ Successfully connected to PostgreSQL!")
 }
 
 func main() {
-	db, err := gorm.Open(sqlite.Open("text.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
+	fmt.Println("postgress setup")
+	ConnectDb()
+	if DB == nil {
+		fmt.Println("❌ Database connection failed!")
+		return
 	}
 
-	db.AutoMigrate(&Product{})
-
-	//create db
-
-	db.Create(&Product{
-		Code:  "D42",
-		Price: 2001,
-	})
-
-	// Read
-	var product Product
-	db.First(&product, 1)
-	// db.First(*&product, "Code = ?", "D42")
+	// Auto Migrate Tables
+	// config.DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(User{})
+	fmt.Println("✅ Database migrated successfully!")
 }
